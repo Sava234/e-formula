@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="eng">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>controlling the machine</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --panel-color: #1E1E1E;
+            --accent-color: #FF6D00;
+            --accent-dark: #E65100;
+            --text-color: #E0E0E0;
+            --text-secondary: #9E9E9E;
+            --success-color: #2E7D32;
+            --error-color: #C62828;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        h1, h2 {
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background-color: var(--panel-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        .connection-panel {
+            grid-column: span 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+        
+        .control-panel {
+            grid-column: 1;
+        }
+        
+        .settings-panel {
+            grid-column: 2;
+        }
+        
+        .sensor-panel {
+            grid-column: span 2;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--error-color);
+        }
+        
+        .status-indicator.connected {
+            background-color: var(--success-color);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            background-color: var(--accent-color);
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+        }
+        
+        .btn-error {
+            background-color: var(--error-color);
+        }
+        
+        .joystick-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        
+        .joystick-area {
+            width: 180px;
+            height: 180px;
+            position: relative;
+            background-color: #2D2D2D;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            margin-bottom: 20px;
+        }
+        
+        .joystick {
+            width: 50px;
+            height: 50px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            position: absolute;
+            top: 65px;
+            left: 65px;
+            transition: transform 0.1s;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        
+        .control-grid .btn {
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .control-grid .btn:nth-child(1) {
+            grid-column: 2;
+            grid-row: 1;
+        }
+        
+        .control-grid .btn:nth-child(2) {
+            grid-column: 1;
+            grid-row: 2;
+        }
+        
+        .control-grid .btn:nth-child(3) {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        
+        .control-grid .btn:nth-child(4) {
+            grid-column: 3;
+            grid-row: 2;
+        }
+        
+        .control-grid .btn:nth-child(5) {
+            grid-column: 2;
+            grid-row: 3;
+        }
+        
+        .slider-container {
+            margin-bottom: 20px;
+        }
+        
+        .slider-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        .slider-value {
+            float: right;
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #424242;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .sensor-bars {
+            display: flex;
+            height: 120px;
+            align-items: flex-end;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .sensor-bar {
+            flex: 1;
+            background-color: var(--accent-color);
+            transition: height 0.3s;
+            position: relative;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .sensor-bar::after {
+            content: attr(data-index);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .sensor-bar.active {
+            background-color: #FF3D00;
+        }
+        
+        .data-display {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #2D2D2D;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-panel, .settings-panel {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>controlling the Arduino machineControlling the machine</h1>
+    
+    <div class="connection-panel panel">
+        <div class="connection-status">
+            <div class="status-indicator" id="statusIndicator"></div>
+            <span id="connectionStatusText">not connected</span>
+        </div>
+        <div class="button-group">
+            <button class="btn btn-success" id="connectBtn">connect</button>
+            <button class="btn btn-error" id="disconnectBtn">disconnect</button>
+        </div>
+    </div>
+    
+    <div class="control-panel panel">
+        <h2>manual control</h2>
+        
+        <div class="joystick-container">
+            <div class="joystick-area" id="joystickArea">
+                <div class="joystick" id="joystick"></div>
+            </div>
+            
+            <div class="control-grid">
+                <button class="btn" id="forwardBtn">↑</button>
+                <button class="btn" id="leftBtn">←</button>
+                <button class="btn" id="stopBtn">⏹</button>
+                <button class="btn" id="rightBtn">→</button>
+                <button class="btn" id="backBtn">↓</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="settings-panel panel">
+        <h2>settings</h2>
+        
+        <div class="slider-container">
+            <label for="baseSpeed">base speed: <span class="slider-value" id="baseSpeedValue">150</span></label>
+            <input type="range" id="baseSpeed" min="0" max="255" value="150" class="slider">
+        </div>
+        
+        <div class="slider-container">
+            <label for="lowSpeed">rotation speed: <span class="slider-value" id="lowSpeedValue">70</span></label>
+            <input type="range" id="lowSpeed" min="0" max="255" value="70" class="slider">
+        </div>
+        
+        <div class="slider-container">
+            <label for="turnSpeed">a sharp turn: <span class="slider-value" id="turnSpeedValue">200</span></label>
+            <input type="range" id="turnSpeed" min="0" max="255" value="200" class="slider">
+        </div>
+        
+        <div class="slider-container">
+            <label for="lineThreshold">line threshold: <span class="slider-value" id="lineThresholdValue">1000</span></label>
+            <input type="range" id="lineThreshold" min="0" max="3000" value="1000" class="slider">
+        </div>
+        
+        <button class="btn" id="saveSettingsBtn" style="width: 100%; margin-top: 10px;">
+            save settings
+        </button>
+    </div>
+    
+    <div class="sensor-panel panel">
+        <h2>data from sensors</h2>
+        
+        <div class="sensor-bars" id="sensorBars"></div>
+        
+        <div class="data-display">
+            <div id="sensorValues">waiting for data...</div>
+            <div id="linePosition">line position: -</div>
+        </div>
+    </div>
+
+    <script>
+        // Элементы интерфейса
+        const statusIndicator = document.getElementById('statusIndicator');
+        const connectionStatusText = document.getElementById('connectionStatusText');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const forwardBtn = document.getElementById('forwardBtn');
+        const backBtn = document.getElementById('backBtn');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const baseSpeedSlider = document.getElementById('baseSpeed');
+        const lowSpeedSlider = document.getElementById('lowSpeed');
+        const turnSpeedSlider = document.getElementById('turnSpeed');
+        const lineThresholdSlider = document.getElementById('lineThreshold');
+        const baseSpeedValue = document.getElementById('baseSpeedValue');
+        const lowSpeedValue = document.getElementById('lowSpeedValue');
+        const turnSpeedValue = document.getElementById('turnSpeedValue');
+        const lineThresholdValue = document.getElementById('lineThresholdValue');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const sensorValuesDisplay = document.getElementById('sensorValues');
+        const sensorBars = document.getElementById('sensorBars');
+        const linePositionDisplay = document.getElementById('linePosition');
+        const joystickArea = document.getElementById('joystickArea');
+        const joystick = document.getElementById('joystick');
+
+        // Переменные
+        let serialPort = null;
+        let reader = null;
+        let isConnected = false;
+        let sensorData = [0, 0, 0, 0, 0, 0, 0, 0];
+        let linePosition = 0;
+        
+        // Инициализация сенсорных полос
+        for (let i = 0; i < 8; i++) {
+            const bar = document.createElement('div');
+            bar.className = 'sensor-bar';
+            bar.dataset.index = i;
+            bar.style.height = '0px';
+            sensorBars.appendChild(bar);
+        }
+
+        // Обновление значений слайдеров
+        function updateSliderValues() {
+            baseSpeedValue.textContent = baseSpeedSlider.value;
+            lowSpeedValue.textContent = lowSpeedSlider.value;
+            turnSpeedValue.textContent = turnSpeedSlider.value;
+            lineThresholdValue.textContent = lineThresholdSlider.value;
+        }
+        
+        baseSpeedSlider.addEventListener('input', updateSliderValues);
+        lowSpeedSlider.addEventListener('input', updateSliderValues);
+        turnSpeedSlider.addEventListener('input', updateSliderValues);
+        lineThresholdSlider.addEventListener('input', updateSliderValues);
+
+        // Подключение к Arduino
+        connectBtn.addEventListener('click', async () => {
+            try {
+                if (!navigator.serial) {
+                    alert('The Web Serial API is not supported in your browser. Try Chrome or Edge.');
+                    return;
+                }
+                
+                serialPort = await navigator.serial.requestPort();
+                await serialPort.open({ baudRate: 9600 });
+                
+                isConnected = true;
+                statusIndicator.classList.add('connected');
+                connectionStatusText.textContent = 'connected';
+                
+                // Начать чтение данных
+                readSerialData();
+                
+                // Запросить текущие настройки
+                sendCommand('GET_SETTINGS');
+                
+            } catch (error) {
+                console.error('connection error:', error);
+                alert(`connection error: ${error.message}`);
+            }
+        });
+
+        // Отключение от Arduino
+        disconnectBtn.addEventListener('click', async () => {
+            try {
+                if (reader) {
+                    await reader.cancel();
+                    reader = null;
+                }
+                
+                if (serialPort) {
+                    await serialPort.close();
+                    serialPort = null;
+                }
+                
+                isConnected = false;
+                statusIndicator.classList.remove('connected');
+                connectionStatusText.textContent = 'not connected';
+                
+            } catch (error) {
+                console.error('disconnection error:', error);
+            }
+        });
+
+        // Чтение данных из последовательного порта
+        async function readSerialData() {
+            try {
+                while (serialPort && serialPort.readable) {
+                    reader = serialPort.readable.getReader();
+                    
+                    try {
+                        while (true) {
+                            const { value, done } = await reader.read();
+                            if (done) break;
+                            
+                            const text = new TextDecoder().decode(value);
+                            processSerialData(text);
+                        }
+                    } finally {
+                        reader.releaseLock();
+                    }
+                }
+            } catch (error) {
+                console.error('reading error:', error);
+                if (isConnected) {
+                    statusIndicator.classList.remove('connected');
+                    connectionStatusText.textContent = 'connection error';
+                    isConnected = false;
+                }
+            }
+        }
+
+        // Обработка полученных данных
+        function processSerialData(text) {
+            // Обработка данных сенсоров
+            if (text.startsWith('Position:')) {
+                const parts = text.split('|');
+                if (parts.length >= 2) {
+                    // Парсим положение линии
+                    const posMatch = parts[0].match(/Position:\s*(-?\d+)/);
+                    if (posMatch) {
+                        linePosition = parseInt(posMatch[1]);
+                        linePositionDisplay.textContent = `line position: ${linePosition}`;
+                    }
+                    
+                    // Парсим значения сенсоров
+                    const sensorsMatch = parts[1].match(/Sensors:\s*([\d\s]+)/);
+                    if (sensorsMatch) {
+                        const sensors = sensorsMatch[1].trim().split(/\s+/).map(Number);
+                        if (sensors.length === 8) {
+                            sensorData = sensors;
+                            updateSensorDisplay();
+                        }
+                    }
+                }
+            }
+            // Обработка текущих настроек
+            else if (text.startsWith('SETTINGS:')) {
+                const settings = text.match(/SETTINGS:(\d+),(\d+),(\d+),(\d+)/);
+                if (settings) {
+                    baseSpeedSlider.value = settings[1];
+                    lowSpeedSlider.value = settings[2];
+                    turnSpeedSlider.value = settings[3];
+                    lineThresholdSlider.value = settings[4];
+                    updateSliderValues();
+                }
+            }
+        }
+
+        // Обновление отображения данных сенсоров
+        function updateSensorDisplay() {
+            let maxVal = Math.max(...sensorData, 1);
+            
+            sensorValuesDisplay.textContent = `sensors: ${sensorData.join(', ')}`;
+            
+            for (let i = 0; i < 8; i++) {
+                const bar = sensorBars.children[i];
+                const height = (sensorData[i] / maxVal) * 100;
+                bar.style.height = `${height}px`;
+                
+                // Подсветка сенсоров, которые видят линию
+                if (sensorData[i] > lineThresholdSlider.value) {
+                    bar.classList.add('active');
+                } else {
+                    bar.classList.remove('active');
+                }
+            }
+        }
+
+        // Отправка команд на Arduino
+        async function sendCommand(command) {
+            if (!isConnected || !serialPort || !serialPort.writable) {
+                console.warn('not connected to Arduino');
+                return;
+            }
+            
+            try {
+                const writer = serialPort.writable.getWriter();
+                await writer.write(new TextEncoder().encode(command + '\n'));
+                writer.releaseLock();
+            } catch (error) {
+                console.error('command sending error:', error);
+                if (isConnected) {
+                    statusIndicator.classList.remove('connected');
+                    connectionStatusText.textContent = 'conection error';
+                    isConnected = false;
+                }
+            }
+        }
+
+        // Управление движением
+        forwardBtn.addEventListener('mousedown', () => sendCommand('FORWARD'));
+        forwardBtn.addEventListener('touchstart', () => sendCommand('FORWARD'));
+        forwardBtn.addEventListener('mouseup', () => sendCommand('STOP'));
+        forwardBtn.addEventListener('touchend', () => sendCommand('STOP'));
+        
+        backBtn.addEventListener('mousedown', () => sendCommand('BACK'));
+        backBtn.addEventListener('touchstart', () => sendCommand('BACK'));
+        backBtn.addEventListener('mouseup', () => sendCommand('STOP'));
+        backBtn.addEventListener('touchend', () => sendCommand('STOP'));
+        
+        leftBtn.addEventListener('mousedown', () => sendCommand('LEFT'));
+        leftBtn.addEventListener('touchstart', () => sendCommand('LEFT'));
+        leftBtn.addEventListener('mouseup', () => sendCommand('STOP'));
+        leftBtn.addEventListener('touchend', () => sendCommand('STOP'));
+        
+        rightBtn.addEventListener('mousedown', () => sendCommand('RIGHT'));
+        rightBtn.addEventListener('touchstart', () => sendCommand('RIGHT'));
+        rightBtn.addEventListener('mouseup', () => sendCommand('STOP'));
+        rightBtn.addEventListener('touchend', () => sendCommand('STOP'));
+        
+        stopBtn.addEventListener('click', () => sendCommand('STOP'));
+
+        // Сохранение настроек
+        saveSettingsBtn.addEventListener('click', () => {
+            const command = `SET_SETTINGS:${baseSpeedSlider.value},${lowSpeedSlider.value},${turnSpeedSlider.value},${lineThresholdSlider.value}`;
+            sendCommand(command);
+        });
+
+        // Джойстик
+        let isJoystickActive = false;
+        
+        joystickArea.addEventListener('mousedown', startJoystick);
+        joystickArea.addEventListener('touchstart', startJoystick);
+        
+        document.addEventListener('mousemove', moveJoystick);
+        document.addEventListener('touchmove', moveJoystick);
+        
+        document.addEventListener('mouseup', stopJoystick);
+        document.addEventListener('touchend', stopJoystick);
+        
+        function startJoystick(e) {
+            e.preventDefault();
+            isJoystickActive = true;
+            moveJoystick(e);
+        }
+        
+        function moveJoystick(e) {
+            if (!isJoystickActive) return;
+            e.preventDefault();
+            
+            const rect = joystickArea.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            let clientX, clientY;
+            
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            
+            let x = clientX - centerX;
+            let y = clientY - centerY;
+            
+            // Ограничиваем движение джойстика в пределах области
+            const radius = rect.width / 2;
+            const distance = Math.sqrt(x * x + y * y);
+            
+            if (distance > radius) {
+                x = (x / distance) * radius;
+                y = (y / distance) * radius;
+            }
+            
+            // Позиционируем джойстик
+            joystick.style.transform = `translate(${x}px, ${y}px)`;
+            
+            // Нормализуем координаты (-1..1)
+            const normX = x / radius;
+            const normY = y / radius;
+            
+            // Определяем направление движения
+            if (normY < -0.5) {
+                // Вперед
+                if (normX < -0.3) {
+                    sendCommand('SHARP_LEFT');
+                } else if (normX > 0.3) {
+                    sendCommand('SHARP_RIGHT');
+                } else {
+                    sendCommand('FORWARD');
+                }
+            } else if (normY > 0.5) {
+                // Назад
+                sendCommand('BACK');
+            } else if (normX < -0.5) {
+                // Влево
+                sendCommand('LEFT');
+            } else if (normX > 0.5) {
+                // Вправо
+                sendCommand('RIGHT');
+            } else {
+                // Стоп
+                sendCommand('STOP');
+            }
+        }
+        
+        function stopJoystick() {
+            if (!isJoystickActive) return;
+            isJoystickActive = false;
+            
+            // Возвращаем джойстик в центр
+            joystick.style.transform = 'translate(0, 0)';
+            
+            // Останавливаем машинку
+            sendCommand('STOP');
+        }
+    </script>
+</body>
+</html>
