@@ -1,9 +1,6 @@
 # e-formula
 a simple electronic machine based on arduino nano, which will move along the QTR-8A sensor and use motors with gearboxes
-![photo_2025-05-28_18-37-57(1)](https://github.com/user-attachments/assets/3cbc53c2-ffb7-403a-a03d-2bf4ebb50fbd)
-
-
-
+![photo_2025-05-28_18-37-57(1)](https://github.com/user-attachments/assets/d1dd20bc-eca8-43e8-a281-cf2331e52325)
 
 
 
