@@ -4,7 +4,7 @@ a simple electronic machine based on arduino nano, which will move along the QTR
 
 Line-Following Robot on Arduino Nano
 This project is a simple electronic robot that follows a black (or white) line using a QTR-8A sensor and two  motors
-⚙️ Components:
+ Components:
  Arduino Nano
  QTR-8A line sensor (iarduino_I2C_Bumper)
  Two servo motors
@@ -14,7 +14,7 @@ This project is a simple electronic robot that follows a black (or white) line u
  Voltage regulator (5V converter)
  Micromotor with gearbox 6V 200 RPM
  
- 🛠️ Assembly & Setup:
+  Assembly & Setup:
  Connect all components to the Arduino Nano according to your wiring diagram. Double-check power and GND connections.
  Install required libraries in the Arduino IDE:
  QTR-8A
@@ -31,7 +31,7 @@ This project is a simple electronic robot that follows a black (or white) line u
  Place the robot on a line-following track.
  If needed, adjust parameters in the code: lineThreshold, centerAngle, minAngle, maxAngle, steeringSensitivity.
 
-🧠 How It Works:
+How It Works:
 8 infrared sensors detect the line position.
 The code calculates the deviation from the center.
 The servo motors steer the robot to follow the line accordingly.
