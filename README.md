@@ -37,6 +37,7 @@ How It Works:
 The code calculates the deviation from the center.
 The servo motors steer the robot to follow the line accordingly.
 
+![изображение](https://github.com/user-attachments/assets/7864fe7e-44b6-4fbc-b630-34cfaa1553d8)
 
 
 
